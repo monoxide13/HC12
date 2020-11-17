@@ -47,6 +47,8 @@ unsigned int HC12::receive(){
 	  HC12ByteIn = serial->read();
 	  if (HC12ByteIn == '\n'){
 		  if (forwardCommand && HC12ReadBuffer.startsWith("AT+")) {      // Check to see if a command is received from remote
+		  	serial->print("RX:"+HC12ReadBuffer);
+			serial->flush();
 			digitalWrite(commandPin, LOW);
 			delay(50);
 			serial->print(SerialReadBuffer);
@@ -54,7 +56,7 @@ unsigned int HC12::receive(){
 			delay(50);
 			digitalWrite(commandPin, HIGH);
 			delay(100);
-		  } else { // Not a local command. Set it as the return value;
+		  } else { // Not a local command. Save it.
 				lastRead = HC12ReadBuffer;
 				readReady = true;
 		  }

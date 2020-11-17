@@ -36,6 +36,7 @@ Powering the module on with the SET pin held to GND will force it's serial port 
 ### Advanced Settings
 * bool forwardCommand;
   * If this is set to true, commands given to the local device will also be broadcast to all listening devices for them to comply with.
+  * Listening devices will repond with "RX:[command]" to verify they have received the command. Although nothing is done with this info, it will be output to your local serial log.
   * At this time, it's not set up to get a response verifying a successful command at the remote device.
 * TODO:
   * changeMode(unsigned int);
