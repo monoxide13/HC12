@@ -25,7 +25,7 @@ String HC12::command(String command){
 		serial->flush();
 	}
 	digitalWrite(commandPin, LOW);
-	delay(50);
+	delay(100); // 50 too short. Need 100.
 	serial->print(command);
 	String retVal = serial->readString();
 	delay(100);
@@ -35,7 +35,7 @@ String HC12::command(String command){
 
 bool HC12::send(String input){
 	if(!sleeping){
-		serial->println(input);
+		serial->print(input);
 		return 1;
 	}
 	return 0;
@@ -44,33 +44,27 @@ bool HC12::send(String input){
 unsigned int HC12::receive(){
 	int retVal=0;
 	while (serial->available()) {
-	  HC12ByteIn = serial->read();
-	  if (HC12ByteIn == '\n'){
-		  if (forwardCommand && HC12ReadBuffer.startsWith("AT+")) {      // Check to see if a command is received from remote
-		  	serial->print("RX:"+HC12ReadBuffer);
-			serial->flush();
-			digitalWrite(commandPin, LOW);
-			delay(50);
-			serial->print(SerialReadBuffer);
-			serial->flush();
-			delay(50);
-			digitalWrite(commandPin, HIGH);
-			delay(100);
-		  } else { // Not a local command. Save it.
+		HC12ByteIn = serial->read();
+		if (HC12ByteIn == '\n'){
+			if (forwardCommand && HC12ReadBuffer.startsWith("AT+")) {      // Check to see if a command is received from remote
+		  		forwardCommand = false;
+				command(HC12ReadBuffer);
+		  		forwardCommand = true;
+			} else { // Not a local command. Set it as the return value;
 				lastRead = HC12ReadBuffer;
 				readReady = true;
-		  }
-		  HC12ReadBuffer = "";
-	  }
-	  else
-		HC12ReadBuffer += char(HC12ByteIn);
-		++retVal;
+		 	}
+			HC12ReadBuffer = "";
+		}else{
+			HC12ReadBuffer += char(HC12ByteIn);
+			++retVal;
+		}
 	}
 	return retVal;
 };
 
 bool HC12::testModule(){
-	if(command("AT") == "OK\n")
+	if(command("AT").startsWith("OK"))
 		return 1;
 	return 0;
 };
